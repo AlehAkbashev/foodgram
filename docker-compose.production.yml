@@ -1,0 +1,44 @@
+version: '3'
+
+volumes:
+  pg_food:
+  static:
+  media:
+  docs:
+
+services:
+
+  foodgram_db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_food:/var/lib/postgresql/data/
+    restart: on-failure
+  
+  backend:
+    image: akbashevaleh/food-back:latest
+    env_file: .env
+    depends_on:
+      - foodgram_db
+    volumes:
+      - static:/backend_static/
+      - media:/app/media/
+      - docs:/docs/
+  
+  frontend:
+    image: akbashevaleh/food-front:latest
+    env_file: .env
+    volumes:
+      - static:/frontend_static/
+    command: cp -r /app/build/. /frontend_static/
+
+  gateway:
+    image: akbashevaleh/food-gateway:latest
+    ports:
+      - 5000:80
+    volumes:
+      - static:/static/
+      - docs:/usr/share/nginx/html/api/docs/
+      - media:/media/
+
+
